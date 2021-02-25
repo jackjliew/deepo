@@ -31,7 +31,8 @@ class Python(Module):
             python%s ~/get-pip.py && \
             ln -s /usr/bin/python%s /usr/local/bin/python3 && \
             ln -s /usr/bin/python%s /usr/local/bin/python && \
-            $PIP_INSTALL config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
+            python -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
+            python -m pip config set global.timeout 120 && \
             $PIP_INSTALL \
                 setuptools \
                 && \
@@ -64,6 +65,6 @@ class Python(Module):
                 matplotlib \
                 Cython \
                 tqdm \
-		pytest \
+                pytest \
                 && \
         '''

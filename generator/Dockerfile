@@ -1,105 +1,119 @@
-        # ==================================================================
-        # module list
-        # ------------------------------------------------------------------
-        # python        3.6    (apt)
-        # tensorflow    latest (pip)
-        # keras         latest (pip)
-        # ==================================================================
+# ==================================================================
+# module list
+# ------------------------------------------------------------------
+# python        3.6    (apt)
+# jupyter       latest (pip)
+# tensorflow    latest (pip)
+# jupyterlab    latest (pip)
+# keras         latest (pip)
+# ==================================================================
 
-        FROM ubuntu:18.04
-        ENV LANG C.UTF-8
-        RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
-            PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
-            GIT_CLONE="git clone --depth 10" && \
+FROM ubuntu:18.04
+ENV LANG C.UTF-8
+RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
+    PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
+    GIT_CLONE="git clone --depth 10" && \
 
-            rm -rf /var/lib/apt/lists/* \
-                   /etc/apt/sources.list.d/cuda.list \
-                   /etc/apt/sources.list.d/nvidia-ml.list && \
+    rm -rf /var/lib/apt/lists/* \
+           /etc/apt/sources.list.d/cuda.list \
+           /etc/apt/sources.list.d/nvidia-ml.list && \
 
-            apt-get update && \
+    apt-get update && \
 
-        # ==================================================================
-        # tools
-        # ------------------------------------------------------------------
+# ==================================================================
+# tools
+# ------------------------------------------------------------------
 
-            DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
-                build-essential \
-                apt-utils \
-                ca-certificates \
-                wget \
-                git \
-                vim \
-                libssl-dev \
-                curl \
-                unzip \
-                unrar \
-                && \
+    DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
+        build-essential \
+        apt-utils \
+        ca-certificates \
+        wget \
+        git \
+        vim \
+        libssl-dev \
+        curl \
+        unzip \
+        unrar \
+        cmake && \
 
-            $GIT_CLONE https://github.com/Kitware/CMake ~/cmake && \
-            cd ~/cmake && \
-            ./bootstrap && \
-            make -j"$(nproc)" install && \
+# ==================================================================
+# python
+# ------------------------------------------------------------------
 
-        # ==================================================================
-        # python
-        # ------------------------------------------------------------------
+    DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
+        software-properties-common \
+        && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
+        python3.6 \
+        python3.6-dev \
+        python3-distutils-extra \
+        && \
+    wget -O ~/get-pip.py \
+        https://bootstrap.pypa.io/get-pip.py && \
+    python3.6 ~/get-pip.py && \
+    ln -s /usr/bin/python3.6 /usr/local/bin/python3 && \
+    ln -s /usr/bin/python3.6 /usr/local/bin/python && \
+    python -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
+    python -m pip config set global.timeout 120 && \
+    $PIP_INSTALL \
+        setuptools \
+        && \
+    $PIP_INSTALL \
+        numpy \
+        scipy \
+        pandas \
+        cloudpickle \
+        scikit-image>=0.14.2 \
+        scikit-learn \
+        matplotlib \
+        Cython \
+        tqdm \
+        pytest \
+        && \
 
-            DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
-                software-properties-common \
-                && \
-            add-apt-repository ppa:deadsnakes/ppa && \
-            apt-get update && \
-            DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
-                python3.6 \
-                python3.6-dev \
-                python3-distutils-extra \
-                && \
-            wget -O ~/get-pip.py \
-                https://bootstrap.pypa.io/get-pip.py && \
-            python3.6 ~/get-pip.py && \
-            ln -s /usr/bin/python3.6 /usr/local/bin/python3 && \
-            ln -s /usr/bin/python3.6 /usr/local/bin/python && \
-            $PIP_INSTALL config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
-            $PIP_INSTALL \
-                setuptools \
-                && \
-            $PIP_INSTALL \
-                numpy \
-                scipy \
-                pandas \
-                cloudpickle \
-                scikit-image>=0.14.2 \
-                scikit-learn \
-                matplotlib \
-                Cython \
-                tqdm \
-		pytest \
-                && \
+# ==================================================================
+# jupyter
+# ------------------------------------------------------------------
 
-        # ==================================================================
-        # tensorflow
-        # ------------------------------------------------------------------
+    $PIP_INSTALL \
+        jupyter \
+        && \
 
-            $PIP_INSTALL \
-                tensorflow \
-                && \
+# ==================================================================
+# tensorflow
+# ------------------------------------------------------------------
 
-        # ==================================================================
-        # keras
-        # ------------------------------------------------------------------
+    $PIP_INSTALL \
+        tensorflow \
+        && \
 
-            $PIP_INSTALL \
-                h5py \
-                keras \
-                && \
+# ==================================================================
+# jupyterlab
+# ------------------------------------------------------------------
 
-        # ==================================================================
-        # config & cleanup
-        # ------------------------------------------------------------------
+    $PIP_INSTALL \
+        jupyterlab \
+        && \
 
-            ldconfig && \
-            apt-get clean && \
-            apt-get autoremove && \
-            rm -rf /var/lib/apt/lists/* /tmp/* ~/*
+# ==================================================================
+# keras
+# ------------------------------------------------------------------
 
-        EXPOSE 6006
+    $PIP_INSTALL \
+        h5py \
+        keras \
+        && \
+
+# ==================================================================
+# config & cleanup
+# ------------------------------------------------------------------
+
+    ldconfig && \
+    apt-get clean && \
+    apt-get autoremove && \
+    rm -rf /var/lib/apt/lists/* /tmp/* ~/*
+
+EXPOSE 8888 6006
